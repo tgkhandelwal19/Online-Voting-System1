@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row align-items-center mb-5">
+    <div class="col-lg-6 mb-4 mb-lg-0">
+        <h1 class="display-4 fw-bold text-primary mb-3">Your Voice Matters.</h1>
+        <p class="lead text-muted mb-4">Participate in the democratic process securely and transparently. Our advanced online voting system ensures that your vote is counted and protected against fraud.</p>
+        <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+            <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg px-4 me-md-2 shadow-sm">Register to Vote</a>
+            <a href="{{ url_for('login') }}" class="btn btn-outline-secondary btn-lg px-4 shadow-sm">Login</a>
+        </div>
+    </div>
+    <div class="col-lg-6 text-center">
+        <!-- We use an implicit illustration styling or font awesome icon for landing -->
+        <i class="fas fa-shield-alt text-primary" style="font-size: 15rem; opacity: 0.8; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.1));"></i>
+    </div>
+</div>
+
+<div class="row text-center mt-5 pt-4 border-top">
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 border-0 shadow-sm feature-card">
+            <div class="card-body py-5">
+                <i class="fas fa-lock text-primary mb-3" style="font-size: 3rem;"></i>
+                <h4 class="card-title fw-bold">Secure Voting</h4>
+                <p class="card-text text-muted">Advanced password hashing and strictly 1-vote-per-user ensures election integrity.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 border-0 shadow-sm feature-card">
+            <div class="card-body py-5">
+                <i class="fas fa-chart-pie text-primary mb-3" style="font-size: 3rem;"></i>
+                <h4 class="card-title fw-bold">Live Results</h4>
+                <p class="card-text text-muted">Watch the outcome unfold through dynamic, real-time visual charts.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 border-0 shadow-sm feature-card">
+            <div class="card-body py-5">
+                <i class="fas fa-clock text-primary mb-3" style="font-size: 3rem;"></i>
+                <h4 class="card-title fw-bold">Time Managed</h4>
+                <p class="card-text text-muted">Admins configure strict voting deadlines automatically managed by the system.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
