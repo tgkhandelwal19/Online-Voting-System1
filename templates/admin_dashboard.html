@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12 text-center text-md-start">
+        <h2 class="fw-bold mb-1">Admin Dashboard</h2>
+        <p class="text-muted">Manage election settings, candidates, and oversee results.</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Candidates Management -->
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white border-0 pt-4 pb-0">
+                <h5 class="fw-bold text-primary mb-0"><i class="fas fa-users me-2"></i>Candidate Management</h5>
+            </div>
+            <div class="card-body">
+                <!-- Add Candidate Form -->
+                <form action="{{ url_for('add_candidate') }}" method="POST" class="mb-5 p-4 bg-light rounded-3">
+                    <h6 class="fw-semibold mb-3">Add New Candidate</h6>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" name="name" placeholder="Candidate Name" required>
+                        </div>
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" name="party" placeholder="Party / Affiliation" required>
+                        </div>
+                        <div class="col-12">
+                            <textarea class="form-control" name="agenda" placeholder="Agenda / Vision Statement (Optional)" rows="2"></textarea>
+                        </div>
+                        <div class="col-12 text-end">
+                            <button type="submit" class="btn btn-primary px-4 shadow-sm"><i class="fas fa-plus me-1"></i> Add Candidate</button>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- List Current Candidates -->
+                <h6 class="fw-semibold mb-3">Current Candidates</h6>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Name</th>
+                                <th>Party</th>
+                                <th class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for candidate in candidates %}
+                            <tr>
+                                <td class="fw-semibold">{{ candidate.name }}</td>
+                                <td><span class="badge bg-secondary">{{ candidate.party }}</span></td>
+                                <td class="text-end">
+                                    <form action="{{ url_for('delete_candidate', candidate_id=candidate.id) }}" method="POST" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Remove this candidate and their votes?')"><i class="fas fa-trash"></i></button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="3" class="text-center text-muted py-3">No candidates added yet.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Election Administration Controls -->
+    <div class="col-lg-4">
+        <!-- Settings Card -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white border-0 pt-4 pb-0">
+                <h5 class="fw-bold text-primary mb-0"><i class="fas fa-cog me-2"></i>Election Control</h5>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('update_settings') }}" method="POST">
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Status</label>
+                        {% if settings and settings.is_active %}
+                            <div class="alert alert-success py-2 mb-3"><i class="fas fa-play-circle me-1"></i> Active</div>
+                            <button type="submit" name="action" value="close_election" class="btn btn-outline-warning w-100 shadow-sm"><i class="fas fa-pause me-1"></i> Close Election Manual</button>
+                        {% else %}
+                            <div class="alert alert-secondary py-2 mb-3"><i class="fas fa-stop-circle me-1"></i> Inactive/Closed</div>
+                            <button type="submit" name="action" value="open_election" class="btn btn-outline-success w-100 shadow-sm"><i class="fas fa-play me-1"></i> Open Election</button>
+                        {% endif %}
+                    </div>
+                </form>
+                <hr>
+                <form action="{{ url_for('update_settings') }}" method="POST">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Set Voting Deadline</label>
+                        <input type="datetime-local" class="form-control" name="deadline" 
+                               value="{% if settings and settings.deadline %}{{ settings.deadline.strftime('%Y-%m-%dT%H:%M') }}{% endif %}">
+                    </div>
+                    <button type="submit" name="action" value="update_deadline" class="btn btn-primary w-100 shadow-sm">Save Deadline</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Danger Zone -->
+        <div class="card shadow-sm border-danger border border-1">
+            <div class="card-header bg-white border-0 pt-3 pb-0 text-danger">
+                <h6 class="fw-bold mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Danger Zone</h6>
+            </div>
+            <div class="card-body">
+                <a href="{{ url_for('export_csv') }}" class="btn btn-outline-primary mb-3 w-100 shadow-sm"><i class="fas fa-file-csv me-1"></i> Export Results CSV</a>
+                <form action="{{ url_for('reset_election') }}" method="POST" onsubmit="return confirm('Critical Action: This will wipe ALL VOTES. Proceed?');">
+                    <button type="submit" class="btn btn-danger w-100 shadow-sm"><i class="fas fa-history me-1"></i> Reset Entire Election</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

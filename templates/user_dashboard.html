@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row mb-5">
+    <div class="col-12 text-center text-md-start">
+        <h2 class="fw-bold mb-1">Voting Dashboard</h2>
+        <p class="text-muted">Review candidates and cast your single secure vote.</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    {% if not election_active %}
+    <div class="col-12">
+        <div class="alert alert-warning shadow-sm border-0 d-flex align-items-center">
+            <i class="fas fa-exclamation-triangle fa-2x me-3"></i>
+            <div>
+                <h5 class="alert-heading fw-bold mb-1">Election Closed</h5>
+                <p class="mb-0">The election is currently inactive or the voting deadline has passed. Casting new votes is disabled.</p>
+            </div>
+        </div>
+    </div>
+    {% elif has_voted %}
+    <div class="col-12">
+        <div class="alert alert-success shadow-sm border-0 d-flex align-items-center">
+            <i class="fas fa-check-circle fa-2x me-3"></i>
+            <div>
+                <h5 class="alert-heading fw-bold mb-1">Vote Recorded</h5>
+                <p class="mb-0">You have successfully cast your vote. Thank you for participating!</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if candidates %}
+        {% for candidate in candidates %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 border-0 shadow-sm candidate-card">
+                <div class="card-body p-4 text-center">
+                    <div class="avatar bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3 shadow-sm" style="width: 80px; height: 80px; font-size: 2rem;">
+                        {{ candidate.name[0] | upper }}
+                    </div>
+                    <h5 class="card-title fw-bold mb-1">{{ candidate.name }}</h5>
+                    <h6 class="card-subtitle mb-3 text-primary">{{ candidate.party }}</h6>
+                    <p class="card-text text-muted small px-2">{{ candidate.agenda or 'No agenda provided by the candidate.' }}</p>
+                </div>
+                <div class="card-footer bg-white border-0 pb-4 pt-0 text-center">
+                    {% if not has_voted and election_active %}
+                    <button class="btn btn-primary btn-lg rounded-pill px-4 shadow-sm vote-btn" data-id="{{ candidate.id }}" data-name="{{ candidate.name }}">
+                        Vote Now
+                    </button>
+                    {% else %}
+                    <button class="btn btn-secondary btn-lg rounded-pill px-4" disabled>
+                        <i class="fas fa-lock me-1"></i> Locked
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+    <div class="col-12 text-center py-5">
+        <div class="p-5 bg-white rounded-4 shadow-sm">
+            <i class="fas fa-users-slash text-muted mb-3" style="font-size: 3rem;"></i>
+            <h4 class="text-muted">No Candidates Available</h4>
+            <p>Please check back once the election administrator has configured the candidates.</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const voteBtns = document.querySelectorAll('.vote-btn');
+    voteBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const candidateId = this.getAttribute('data-id');
+            const candidateName = this.getAttribute('data-name');
+            
+            Swal.fire({
+                title: 'Confirm Vote',
+                html: `Are you sure you want to vote for <br><strong>${candidateName}</strong>?<br><br><span class="text-danger small">Note: This action cannot be undone.</span>`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, Cast Vote'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Send AJAX post
+                    fetch(`/vote/${candidateId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if(data.success) {
+                            Swal.fire(
+                                'Voted!',
+                                data.message,
+                                'success'
+                            ).then(() => {
+                                window.location.reload();
+                            });
+                        } else {
+                            Swal.fire(
+                                'Error',
+                                data.message,
+                                'error'
+                            );
+                        }
+                    })
+                    .catch(err => {
+                        Swal.fire('Error', 'An unexpected error occurred.', 'error');
+                    });
+                }
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

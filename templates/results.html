@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10 text-center mb-4">
+        <h2 class="fw-bold text-primary display-5 mb-2">Live Election Results</h2>
+        <p class="text-muted lead">Real-time statistics of the ongoing democratic process.</p>
+        <div class="d-flex justify-content-center mt-3">
+            <button class="btn btn-outline-primary shadow-sm rounded-pill px-4" onclick="fetchResults()"><i class="fas fa-sync-alt me-2" id="syncIcon"></i>Refresh Data</button>
+        </div>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-lg border-0 rounded-4">
+            <div class="card-body p-4 p-md-5">
+                <!-- Canvas for Chart.js -->
+                <div class="chart-container" style="position: relative; height:400px;">
+                    <canvas id="resultsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let resultsChart = null;
+
+    function renderChart(labels, data, colors) {
+        const ctx = document.getElementById('resultsChart').getContext('2d');
+        
+        if(resultsChart) {
+            resultsChart.destroy();
+        }
+
+        resultsChart = new Chart(ctx, {
+            type: 'bar', // Can be 'pie' or 'doughnut'
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Total Votes Recorded',
+                    data: data,
+                    backgroundColor: colors,
+                    borderWidth: 1,
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return ` ${context.raw} Votes`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        },
+                        grid: {
+                            color: 'rgba(0,0,0,0.05)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function fetchResults() {
+        const icon = document.getElementById('syncIcon');
+        icon.classList.add('fa-spin');
+        
+        fetch('/api/results')
+            .then(response => response.json())
+            .then(data => {
+                if(data.labels.length === 0) {
+                    Swal.fire('No Data', 'No candidates available yet.', 'info');
+                } else {
+                    renderChart(data.labels, data.votes, data.colors);
+                }
+                setTimeout(() => icon.classList.remove('fa-spin'), 500);
+            })
+            .catch(error => {
+                console.error('Error fetching results:', error);
+                icon.classList.remove('fa-spin');
+            });
+    }
+
+    // Auto-load on ready
+    document.addEventListener('DOMContentLoaded', fetchResults);
+    
+    // Auto-refresh every 15 seconds
+    setInterval(fetchResults, 15000);
+</script>
+{% endblock %}

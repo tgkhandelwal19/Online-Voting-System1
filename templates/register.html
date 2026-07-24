@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-lg border-0 rounded-4 mt-4">
+            <div class="card-body p-5">
+                <div class="text-center mb-4">
+                    <h2 class="fw-bold text-primary">Create Account</h2>
+                    <p class="text-muted">Register to participate in the election</p>
+                </div>
+                <!-- Adding client-side validation logic -->
+                <form method="POST" action="{{ url_for('register') }}" onsubmit="return validateForm()">
+                    <div class="mb-3">
+                        <label for="name" class="form-label fw-semibold">Full Name</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="fas fa-user text-muted"></i></span>
+                            <input type="text" class="form-control border-start-0 ps-0" id="name" name="name" placeholder="John Doe" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="voter_id" class="form-label fw-semibold">Voter ID</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="fas fa-id-badge text-muted"></i></span>
+                            <input type="text" class="form-control border-start-0 ps-0" id="voter_id" name="voter_id" placeholder="Ex: VOTE12345" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label fw-semibold">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="fas fa-lock text-muted"></i></span>
+                            <input type="password" class="form-control border-start-0 ps-0" id="password" name="password" placeholder="Create a strong password" required>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="confirm_password" class="form-label fw-semibold">Confirm Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="fas fa-lock text-muted"></i></span>
+                            <input type="password" class="form-control border-start-0 ps-0" id="confirm_password" name="confirm_password" placeholder="Repeat password" required>
+                        </div>
+                        <div id="passwordError" class="text-danger small mt-1" style="display:none;">Passwords do not match!</div>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm">Register</button>
+                    </div>
+                </form>
+                <div class="text-center mt-4">
+                    <p class="text-muted small">Already have an account? <a href="{{ url_for('login') }}" class="text-decoration-none fw-bold">Login here</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function validateForm() {
+        var pw = document.getElementById("password").value;
+        var cpw = document.getElementById("confirm_password").value;
+        if(pw !== cpw) {
+            document.getElementById("passwordError").style.display = "block";
+            return false;
+        }
+        document.getElementById("passwordError").style.display = "none";
+        return true;
+    }
+</script>
+{% endblock %}
